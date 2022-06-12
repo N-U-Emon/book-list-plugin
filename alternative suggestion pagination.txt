@@ -1,0 +1,76 @@
+<?php
+
+
+if(!function_exists('book_list_shortcode'))
+{
+
+    function book_list_shortcode(){
+
+        global $wp_query;
+        $original_query = $wp_query;
+
+	/* Added $paged variable */
+        $paged = ( get_query_var( 'paged' ) ) ? get_query_var( 'paged' ) : 1;
+
+        $args = array(
+            'post_type'      => 'book',
+            'posts_per_page' => 8,
+            'paged' => $paged
+        );
+        $loop = new WP_Query($args); 
+        $wp_query = $loop ;
+        ?>
+
+    <div class="book-list-container">
+        <div class="book-list-row">
+            <?php while ( $loop->have_posts() ) : $loop->the_post();  ?>
+
+                <div class="book-list-column">
+                    <div class="book-list-content">
+
+                        <a href="<?php esc_url(the_permalink()); ?>" >
+                            <img src="<?php echo esc_url(get_the_post_thumbnail_url()); ?>" alt="" class="book-list-image">
+                            
+                        </a>
+
+                        <p class="book-list-price-preview-area">
+
+                            <span class="book-list-price" > 
+                                <?php esc_html_e( 'Price', 'book-list' ) ?> : &dollar;<?php echo esc_html( get_post_meta( get_the_ID(), 'price', true ) ) ?> 
+                            </span>
+
+                            <a href="<?php echo esc_url( get_post_meta(get_the_ID(), 'preview_file', true ) ) ?>" target="_blank" class="book-list-preview-file" > 
+                                <?php esc_html_e( 'Preview File', 'book-list' ) ?> 
+                            </a>
+                        </p>
+                        <div class="book-list-text"><?php the_excerpt(); ?></div>
+                    </div>
+                </div>
+
+            <?php
+            endwhile;
+            ?>
+        </div>
+        <div class="book-list-pagination">
+            <?php
+
+
+            the_posts_pagination( array(
+                'mid_size'  => 2,
+                'prev_text' => '&laquo;',
+                'next_text' => '&raquo;',
+            ) );
+            ?>
+        </div>
+    
+    </div>
+        <?php
+        wp_reset_postdata();
+
+        $wp_query = $original_query;
+
+    }
+
+}
+
+add_shortcode( 'book-list', 'book_list_shortcode' );
